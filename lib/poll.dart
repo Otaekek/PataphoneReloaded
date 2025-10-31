@@ -7,17 +7,25 @@ import 'dart:async';
 
 class GraphService extends ChangeNotifier {
   List<Graph> graphs = [];
-  String url_string = 'http://localhost:4242';
+  late String urlString;
   bool connected = false;
   String error = "";
 
+  GraphService() {
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      urlString = '127.0.0.1';
+    } else {
+      urlString = '10.0.2.2';
+    }
+  }
   void update_uri({input = String}) {
-    url_string = input;
+    urlString = input;
     notifyListeners();
   }
+
   // Custom constructor
   Future<void> fetchGraphs() async {
-    Uri uri = Uri.parse("$url_string/get_graphs");
+    Uri uri = Uri.parse("http://$urlString:4242/get_graphs");
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
@@ -27,10 +35,10 @@ class GraphService extends ChangeNotifier {
         List<Graph> newGraphs = [];
         for (var graphName in graphNames) {
           if (graphsData.containsKey(graphName)) {
-              dynamic graphData = graphsData[graphName];
-              final nodesData = graphData['nodes'];
-              Graph graph = Graph.fromJson(graphName, graphData, nodesData);
-              newGraphs.add(graph);
+            dynamic graphData = graphsData[graphName];
+            final nodesData = graphData['nodes'];
+            Graph graph = Graph.fromJson(graphName, graphData, nodesData);
+            newGraphs.add(graph);
           }
         }
         graphs = newGraphs;
@@ -39,28 +47,27 @@ class GraphService extends ChangeNotifier {
         graphs = [];
         error = response.statusCode.toString();
         connected = false;
-      } 
-    } catch (e)  {
-        print(e.toString());
-        error = e.toString();
-        graphs = [];
-        connected = false;
+      }
+    } catch (e) {
+      print(e.toString());
+      error = e.toString();
+      graphs = [];
+      connected = false;
     }
     notifyListeners();
   }
 
-bool _isPolling = false;
+  bool _isPolling = false;
 
-void startPolling() {
-
-  Timer.periodic(const Duration(seconds: 2), (_) async {
-    if (_isPolling) return;
-    _isPolling = true;
-    try {
-      await fetchGraphs();
-    } finally {
-      _isPolling = false;
-    }
-  });
-}
+  void startPolling() {
+    Timer.periodic(const Duration(seconds: 2), (_) async {
+      if (_isPolling) return;
+      _isPolling = true;
+      try {
+        await fetchGraphs();
+      } finally {
+        _isPolling = false;
+      }
+    });
+  }
 }

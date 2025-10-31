@@ -21,6 +21,12 @@ version: 1.0.0+1
 environment:
   sdk: ^3.9.2
 
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "images/eye.png" 
+
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -28,6 +34,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter:
     sdk: flutter
 
@@ -38,6 +45,8 @@ dependencies:
   http: ^1.5.0
   window_manager: ^0.5.1
   google_fonts: ^6.3.2
+  camera: ^0.11.3
+  video_player: ^2.10.0
 
 dev_dependencies:
   flutter_test:
