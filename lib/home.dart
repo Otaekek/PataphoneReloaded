@@ -39,7 +39,7 @@ class HomePage extends StatelessWidget {
           shadowColor: Theme.of(context).shadowColor,
           bottom: TabBar(
             tabs: <Widget>[
-              Tab(icon: const Icon(Icons.desktop_windows_outlined), text: "Shaders"), // Should be named graphs, be this is more intuitive
+              Tab(icon: const Icon(Icons.desktop_windows_outlined), text: "Shaders"), // Should be named graphs, but this is more intuitive
               Tab(icon: const Icon(Icons.camera_alt), text: "Record"),
               Tab(icon: const Icon(Icons.lightbulb), text: "Light"),
               Tab(icon: const Icon(Icons.settings_overscan), text: "Mapping"),
