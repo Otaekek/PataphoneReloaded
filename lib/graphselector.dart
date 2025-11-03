@@ -1,8 +1,11 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'connection.dart' show NoConnection;
 import 'graph.dart' show GraphPage;
 import 'poll.dart';
+import 'dart:math';
+import 'package:image/image.dart' as img;
 
 class GraphSelector extends StatelessWidget {
   const GraphSelector({super.key});
@@ -11,15 +14,17 @@ class GraphSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final graphService = Provider.of<GraphService>(context);
     final ThemeData theme = Theme.of(context);
-    Widget graphsBody = GridView.builder(
+    Widget graphsBody = ListView.builder(
       itemCount: graphService.graphs.length,
       itemBuilder: (context, index) {
-        final graph = graphService.graphs[index];
-        return Card.outlined(
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
-            borderRadius: BorderRadius.circular(10),
-          ),
+        var keys = graphService.graphs.keys.toList();
+        var val = graphService.graphs[keys[index]];
+        final graph = val!;
+        return Container(
+//          shape: RoundedRectangleBorder(
+//            side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
+//            borderRadius: BorderRadius.circular(10),
+//          ),
           child: InkWell(
             onTap: () => Navigator.push(
               context,
@@ -28,16 +33,24 @@ class GraphSelector extends StatelessWidget {
             borderRadius: BorderRadius.circular(
               10,
             ), // Match card's border radius
-            child: GraphCard(cardName: graph.name),
+            //child: GraphCard(cardName: graph.name),
+            child: Row(
+              children: [
+                Card.outlined( child: Image(
+                  image: ResizeImage(
+                    graph.preview.image,
+                    width:
+                    min(
+                        MediaQuery.widthOf(context) ~/
+                        2, 256)
+                  ),
+                )),
+                Text(graph.name),
+              ],
+            ),
           ),
         );
       },
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, 
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.61,
-      ),
     );
 
     Widget errcon = NoConnection(
@@ -45,9 +58,7 @@ class GraphSelector extends StatelessWidget {
       uri: graphService.urlString,
     );
     Widget body = graphService.connected ? graphsBody : errcon;
-    return Scaffold(
-      body: body,
-    );
+    return Scaffold(body: body);
   }
 }
 
@@ -64,4 +75,3 @@ class GraphCard extends StatelessWidget {
     );
   }
 }
-

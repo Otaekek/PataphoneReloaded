@@ -6,7 +6,7 @@ import 'data.dart';
 import 'dart:async';
 
 class GraphService extends ChangeNotifier {
-  List<Graph> graphs = [];
+  Map<String, Graph> graphs = {};
   late String urlString;
   bool connected = false;
   String error = "";
@@ -26,10 +26,16 @@ class GraphService extends ChangeNotifier {
   // Custom constructor
   Future<void> fetchGraphs() async {
     Uri uri = Uri.parse("http://$urlString:4242/get_graphs");
+    bool something_changed = false;
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
+        connected = true;
+        //print(response.body);
         final jsonData = json.decode(response.body);
+        if (jsonData == null || !jsonData.containsKey("graphs_name")) {
+          return;
+        }
         final graphNames = (jsonData['graphs_name'] as List).cast<String>();
         final graphsData = jsonData['graphs'];
         List<Graph> newGraphs = [];
@@ -41,20 +47,39 @@ class GraphService extends ChangeNotifier {
             newGraphs.add(graph);
           }
         }
-        graphs = newGraphs;
-        connected = true;
+        for (var graph in newGraphs) {
+          if (graphs.containsKey(graph.uniqueId)) {
+            // graph itself is modified
+            if (!graphs[graph.uniqueId]!.compare(graph)) {
+              graphs[graph.uniqueId] = graph;
+              something_changed = true;
+            }
+          } else {
+            graphs[graph.uniqueId] = graph;
+            something_changed = true;
+          }
+        }
+        var newGrapsAsMap = { for (var graph in newGraphs) graph.uniqueId : graph };
+        for (var graph_id in graphs.keys) {
+          if (!newGrapsAsMap.containsKey(graph_id)) {
+            graphs.remove(graph_id);
+            something_changed = true;
+          }
+        }
       } else {
-        graphs = [];
+        graphs = {};
         error = response.statusCode.toString();
         connected = false;
       }
     } catch (e) {
       print(e.toString());
       error = e.toString();
-      graphs = [];
+      graphs = {};
       connected = false;
     }
-    notifyListeners();
+    if (something_changed) {
+      notifyListeners();
+    }
   }
 
   bool _isPolling = false;
