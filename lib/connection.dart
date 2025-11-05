@@ -19,9 +19,13 @@ class NoConnection extends StatelessWidget {
             graphService.update_uri(input: value);
           },
           decoration: InputDecoration(
+            errorMaxLines: null,
             hintText: uri,
-            errorText:
-                "Connection refused because the URI $uri erros out because HTTP error: $error_text. You may change the IP",
+            error: Text(
+              "Connection refused because the URI $uri erros out because HTTP error: $error_text. You may change the IP",
+              softWrap: true,
+              textScaler: TextScaler.linear(.81),
+            ),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,

@@ -45,7 +45,7 @@ class GraphSelector extends StatelessWidget {
                         2, 256)
                   ),
                 )),
-                Text(graph.name),
+                Text(graph.name, softWrap: true,),
               ],
             ),
           ),

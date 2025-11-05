@@ -59,12 +59,18 @@ class GraphService extends ChangeNotifier {
             something_changed = true;
           }
         }
-        var newGrapsAsMap = { for (var graph in newGraphs) graph.uniqueId : graph };
+        var newGrapsAsMap = {
+          for (var graph in newGraphs) graph.uniqueId: graph,
+        };
+        var to_remove = [];
         for (var graph_id in graphs.keys) {
           if (!newGrapsAsMap.containsKey(graph_id)) {
-            graphs.remove(graph_id);
+            to_remove.add(graph_id);
             something_changed = true;
           }
+        }
+        for (var i = 0; i < to_remove.length; ++i) {
+          graphs.remove(to_remove[i]);
         }
       } else {
         graphs = {};
@@ -85,7 +91,7 @@ class GraphService extends ChangeNotifier {
   bool _isPolling = false;
 
   void startPolling() {
-    Timer.periodic(const Duration(seconds: 2), (_) async {
+    Timer.periodic(const Duration(seconds: 1), (_) async {
       if (_isPolling) return;
       _isPolling = true;
       try {

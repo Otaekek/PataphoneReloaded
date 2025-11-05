@@ -56,14 +56,14 @@ class Graph {
   final String name;
   final String uniqueId;
   final List<Node> nodes;
+  final int version;
   late Image preview;
   bool is_active = false;
 
   bool compare(Graph other) {
     final same_id = other.uniqueId == uniqueId;
     final same_name = other.name == name;
-    final same_preview = preview.hashCode == other.preview.hashCode;
-    bool same_node = false; 
+    bool same_node = true; 
     if (nodes.length != other.nodes.length) {
       return false;
     }
@@ -72,11 +72,12 @@ class Graph {
         return false;
       }
     }
-    return same_id && same_name && same_node;//same_preview && same_node;
+    return same_id && same_name && same_node && version == other.version && same_node;
   }
   Graph(
     Map<String, dynamic>? preview_data, {
     required this.name,
+    required this.version,
     required this.uniqueId,
     required this.nodes,
   }) {
@@ -136,6 +137,7 @@ Image imageFromRgba(ByteBuffer rgbaBytes, int width, int height) {
     return Graph(
       graphJson["preview"],
       name: graphJson["name"],
+      version: graphJson["version"],
       nodes: nodes,
       uniqueId: unique_id,
     );
