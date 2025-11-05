@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'data.dart';
 import 'dart:async';
-
+import 'package:image/image.dart' as img;
 class GraphService extends ChangeNotifier {
   Map<String, Graph> graphs = {};
   late String urlString;
@@ -26,12 +27,12 @@ class GraphService extends ChangeNotifier {
   // Custom constructor
   Future<void> fetchGraphs() async {
     Uri uri = Uri.parse("http://$urlString:4242/get_graphs");
+
     bool something_changed = false;
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
         connected = true;
-        //print(response.body);
         final jsonData = json.decode(response.body);
         if (jsonData == null || !jsonData.containsKey("graphs_name")) {
           return;
@@ -40,10 +41,19 @@ class GraphService extends ChangeNotifier {
         final graphsData = jsonData['graphs'];
         List<Graph> newGraphs = [];
         for (var graphName in graphNames) {
-          if (graphsData.containsKey(graphName)) {
+          if (graphsData.containsKey( graphName)) {
             dynamic graphData = graphsData[graphName];
             final nodesData = graphData['nodes'];
-            Graph graph = Graph.fromJson(graphName, graphData, nodesData);
+            Image? image;
+            if (graphData["has_preview"]) {
+              var id = graphData["id"];
+              Uri uri_images = Uri.parse("http://$urlString:4242/get_image/$id");
+              var image_data = await http.get(uri_images);
+              print(image_data.headers);
+              var bmp = img.decodeBmp(image_data.bodyBytes)!;
+              image = Image.memory(Uint8List.fromList(img.encodeBmp(bmp)));
+            }
+            Graph graph = Graph.fromJson(graphName, graphData, nodesData, image);
             newGraphs.add(graph);
           }
         }

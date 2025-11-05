@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:image/image.dart' as img;
@@ -14,10 +15,15 @@ class NodeAttribute {
   bool compare(NodeAttribute other) {
     return value == other.value || name != other.name;
   }
+
   NodeAttribute({required this.name, required this.type, required this.value});
 
   factory NodeAttribute.fromJson(String name, Map<String, dynamic> json) {
-    return NodeAttribute(name: name, type: json['type'] ?? 'unknown', value: json['value']);
+    return NodeAttribute(
+      name: name,
+      type: json['type'] ?? 'unknown',
+      value: json['value'],
+    );
   }
 }
 
@@ -32,15 +38,15 @@ class Node {
     bool ret = true;
     var l1 = List.from(attributes.values);
     var l2 = List.from(other.attributes.values);
-    
-    for (var i = 0; i < attributes.length; ++i)
-    {
+
+    for (var i = 0; i < attributes.length; ++i) {
       if (!l1[i].compare(l2[i])) {
         ret = false;
       }
     }
     return ret;
   }
+
   Node({required this.name, required this.attributes});
 
   factory Node.fromJson(String name, Map<String, dynamic> json) {
@@ -63,7 +69,7 @@ class Graph {
   bool compare(Graph other) {
     final same_id = other.uniqueId == uniqueId;
     final same_name = other.name == name;
-    bool same_node = true; 
+    bool same_node = true;
     if (nodes.length != other.nodes.length) {
       return false;
     }
@@ -72,16 +78,21 @@ class Graph {
         return false;
       }
     }
-    return same_id && same_name && same_node && version == other.version && same_node;
+    return same_id &&
+        same_name &&
+        same_node &&
+        version == other.version &&
+        same_node;
   }
+
   Graph(
-    Map<String, dynamic>? preview_data, {
+    Image? image, {
     required this.name,
     required this.version,
     required this.uniqueId,
     required this.nodes,
   }) {
-    preview = load_preview(preview_data)!;
+    preview = image != null? image : load_preview();
   }
 
   ui.Image rawRgbaToUiImageSync(Uint8List rgbaBytes, int width, int height) {
@@ -100,31 +111,33 @@ class Graph {
     result = completer.future.asStream().first as ui.Image;
     return result;
   }
-Image imageFromRgba(ByteBuffer rgbaBytes, int width, int height) {
-  // Decode raw RGBA bytes into an Image package image
-  final image = img.Image.fromBytes(width: width, height: height, bytes: rgbaBytes, numChannels: 4, format: img.Format.uint8);
-  // Encode to PNG
-  final bmp = Uint8List.fromList(img.encodeBmp(image));
 
-  // Return a Flutter Image widget
-  return Image.memory(bmp);
-}
-  Image load_preview(Map<String, dynamic>? preview_data) {
-    if (preview_data == null) {
-      final file = File("./images/eye.png");
-      return Image.file(file);
-    } else {
-      var size_x = preview_data["preview_size_x"];
-      var size_y = preview_data["preview_size_y"];
-      final data = base64Decode(preview_data["data"]);
-      return imageFromRgba(data.buffer, size_x, size_y);
-    }
+  Image imageFromRgba(ByteBuffer rgbaBytes, int width, int height) {
+    // Decode raw RGBA bytes into an Image package image
+    final image = img.Image.fromBytes(
+      width: width,
+      height: height,
+      bytes: rgbaBytes,
+      numChannels: 4,
+      format: img.Format.uint8,
+    );
+    // Encode to PNG
+    final bmp = Uint8List.fromList(img.encodeBmp(image));
+
+    // Return a Flutter Image widget
+    return Image.memory(bmp);
+  }
+
+  Image load_preview() {
+    final image = Image.asset('assets/images/eye.png');
+    return image;
   }
 
   factory Graph.fromJson(
     String name,
     Map<String, dynamic> graphJson,
     Map<String, dynamic> nodesJson,
+    Image? image,
   ) {
     List<Node> nodes = [];
     final unique_id = graphJson["id"];
@@ -135,7 +148,7 @@ Image imageFromRgba(ByteBuffer rgbaBytes, int width, int height) {
       }
     }
     return Graph(
-      graphJson["preview"],
+      image,
       name: graphJson["name"],
       version: graphJson["version"],
       nodes: nodes,

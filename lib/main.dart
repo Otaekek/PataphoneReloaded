@@ -8,15 +8,15 @@ import 'dart:io' show Platform;
 import 'package:camera/camera.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize window manager AFTER ensureInitialized
-  await windowManager.ensureInitialized();
   final graphService = GraphService();
   graphService.startPolling();
   // Set window size for desktop platforms
   List<CameraDescription> _cameras = [];
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // Initialize window manager AFTER ensureInitialized
+    await windowManager.ensureInitialized();
     // Common phone sizes:
     // iPhone 14 Pro: 393 x 852
     // iPhone 14 Pro Max: 430 x 932

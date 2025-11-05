@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'connection.dart' show NoConnection;
@@ -20,35 +19,48 @@ class GraphSelector extends StatelessWidget {
         var keys = graphService.graphs.keys.toList();
         var val = graphService.graphs[keys[index]];
         final graph = val!;
-        return Container(
-//          shape: RoundedRectangleBorder(
-//            side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
-//            borderRadius: BorderRadius.circular(10),
-//          ),
-          child: InkWell(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => GraphPage(graph: graph)),
-            ),
-            borderRadius: BorderRadius.circular(
-              10,
-            ), // Match card's border radius
-            //child: GraphCard(cardName: graph.name),
-            child: Row(
-              children: [
-                Card.outlined( child: Image(
-                  image: ResizeImage(
-                    graph.preview.image,
-                    width:
-                    min(
-                        MediaQuery.widthOf(context) ~/
-                        2, 256)
+        final height = graph.preview.height ?? 100;
+        return // Match card's border radius
+        //child: GraphCard(cardName: graph.name),
+        Row(
+          children: [
+            Card.outlined(
+              child: InkWell(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => GraphPage(graph: graph)),
+                ),
+                borderRadius: BorderRadius.circular(10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Image(
+                    image: ResizeImage(
+                      graph.preview.image,
+                      width:
+                          MediaQuery.widthOf(context) ~/
+                          2.5, //min(MediaQuery.widthOf(context) ~/ 2, 256),
+                    ),
                   ),
-                )),
-                Text(graph.name, softWrap: true,),
-              ],
+                ),
+              ),
             ),
-          ),
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    height: height / 2,
+                    alignment: Alignment.centerLeft,
+                    child: Text(graph.name, softWrap: true, textScaler: TextScaler.linear(.9),),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.send),
+                    onPressed: () {},
+                    tooltip: 'Set active',
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
