@@ -28,8 +28,8 @@ class HomePage extends StatelessWidget {
             ),
           ],
           flexibleSpace: Align(
-            alignment: Alignment(0, -5.5),
             child: Image.asset(
+              alignment: Alignment.center,
               'assets/images/eye1.png',
               height: 220,
               width: 120,

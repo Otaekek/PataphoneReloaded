@@ -82,6 +82,7 @@ class Graph {
         same_name &&
         same_node &&
         version == other.version &&
+        //is_active == other.is_active && 
         same_node;
   }
 
@@ -91,8 +92,9 @@ class Graph {
     required this.version,
     required this.uniqueId,
     required this.nodes,
+    required this.is_active,
   }) {
-    preview = image != null? image : load_preview();
+    preview = image ?? load_preview();
   }
 
   ui.Image rawRgbaToUiImageSync(Uint8List rgbaBytes, int width, int height) {
@@ -153,6 +155,7 @@ class Graph {
       version: graphJson["version"],
       nodes: nodes,
       uniqueId: unique_id,
+      is_active: graphJson["is_active"],
     );
   }
 }

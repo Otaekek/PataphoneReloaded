@@ -20,47 +20,55 @@ class GraphSelector extends StatelessWidget {
         var val = graphService.graphs[keys[index]];
         final graph = val!;
         final height = graph.preview.height ?? 100;
-        return // Match card's border radius
-        //child: GraphCard(cardName: graph.name),
-        Row(
-          children: [
-            Card.outlined(
-              child: InkWell(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => GraphPage(graph: graph)),
-                ),
-                borderRadius: BorderRadius.circular(10),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10.0),
-                  child: Image(
-                    image: ResizeImage(
-                      graph.preview.image,
-                      width:
-                          MediaQuery.widthOf(context) ~/
-                          2.5, //min(MediaQuery.widthOf(context) ~/ 2, 256),
+        return Material(
+          color: graph.is_active ? Colors.purple.withAlpha(70) : null,
+          child: Row(
+            children: [
+              Card.outlined(
+                child: InkWell(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => GraphPage(graph: graph)),
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10.0),
+                    child: Image(
+                      image: ResizeImage(
+                        graph.preview.image,
+                        width:
+                            MediaQuery.widthOf(context) ~/
+                            2.5, //min(MediaQuery.widthOf(context) ~/ 2, 256),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child: Row(
-                children: [
-                  Container(
-                    height: height / 2,
-                    alignment: Alignment.centerLeft,
-                    child: Text(graph.name, softWrap: true, textScaler: TextScaler.linear(.9),),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.send),
-                    onPressed: () {},
-                    tooltip: 'Set active',
-                  ),
-                ],
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      height: height / 2,
+                      width: (MediaQuery.widthOf(context) ~/ 2.5).toDouble(),
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        graph.name,
+                        softWrap: true,
+                        textScaler: TextScaler.linear(.9),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.send),
+                      onPressed: () {
+                        graphService.changeActiveShader(graph.uniqueId);
+                      },
+                      tooltip: 'Set active',
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

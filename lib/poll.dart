@@ -24,6 +24,17 @@ class GraphService extends ChangeNotifier {
     notifyListeners();
   }
 
+  void changeActiveShader(String id) async {
+    for (var graph in graphs.values) {
+      graph.is_active = false;
+    } 
+    if (graphs.containsKey(id)) {
+      graphs[id]!.is_active = true;
+    }
+    notifyListeners();
+    Uri uri = Uri.parse("http://$urlString:4242/set_active_graph?graph=$id");
+    await http.post(uri);
+  }
   // Custom constructor
   Future<void> fetchGraphs() async {
     Uri uri = Uri.parse("http://$urlString:4242/get_graphs");
@@ -49,7 +60,6 @@ class GraphService extends ChangeNotifier {
               var id = graphData["id"];
               Uri uri_images = Uri.parse("http://$urlString:4242/get_image/$id");
               var image_data = await http.get(uri_images);
-              print(image_data.headers);
               var bmp = img.decodeBmp(image_data.bodyBytes)!;
               image = Image.memory(Uint8List.fromList(img.encodeBmp(bmp)));
             }
