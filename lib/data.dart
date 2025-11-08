@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,56 +8,10 @@ import 'dart:async';
 import 'package:image/image.dart' as img;
 import 'dart:typed_data';
 
-class NodeAttribute {
-  final String type;
-  dynamic value;
-  final String name;
+import 'package:pataphone/utils.dart';
 
-  bool compare(NodeAttribute other) {
-    return value == other.value || name != other.name;
-  }
+import 'node.dart';
 
-  NodeAttribute({required this.name, required this.type, required this.value});
-
-  factory NodeAttribute.fromJson(String name, Map<String, dynamic> json) {
-    return NodeAttribute(
-      name: name,
-      type: json['type'] ?? 'unknown',
-      value: json['value'],
-    );
-  }
-}
-
-class Node {
-  final String name;
-  final Map<String, NodeAttribute> attributes;
-
-  bool compare(Node other) {
-    if (attributes.length != other.attributes.length || name != other.name) {
-      return false;
-    }
-    bool ret = true;
-    var l1 = List.from(attributes.values);
-    var l2 = List.from(other.attributes.values);
-
-    for (var i = 0; i < attributes.length; ++i) {
-      if (!l1[i].compare(l2[i])) {
-        ret = false;
-      }
-    }
-    return ret;
-  }
-
-  Node({required this.name, required this.attributes});
-
-  factory Node.fromJson(String name, Map<String, dynamic> json) {
-    Map<String, NodeAttribute> attributes = {};
-    json.forEach((key, value) {
-      attributes[key] = NodeAttribute.fromJson(key, value);
-    });
-    return Node(name: name, attributes: attributes);
-  }
-}
 
 class Graph {
   final String name;
@@ -82,7 +37,7 @@ class Graph {
         same_name &&
         same_node &&
         version == other.version &&
-        //is_active == other.is_active && 
+        //is_active == other.is_active &&
         same_node;
   }
 
@@ -146,7 +101,9 @@ class Graph {
     final nodeNames = graphJson['nodes_name'];
     for (var nodeName in nodeNames) {
       if (nodesJson.containsKey(nodeName)) {
-        nodes.add(Node.fromJson(nodeName, nodesJson[nodeName]));
+        if (filter_nodes(nodesJson[nodeName])) {
+          nodes.add(Node.fromJson(name, nodeName, nodesJson[nodeName]));
+        }
       }
     }
     return Graph(
@@ -158,4 +115,13 @@ class Graph {
       is_active: graphJson["is_active"],
     );
   }
+}
+
+bool filter_nodes(Map<String, dynamic> node) {
+  for (var value in node.values) {
+    if (map_type(value["type"]) != "undefined") {
+      return true;
+    }
+  }
+  return false;
 }

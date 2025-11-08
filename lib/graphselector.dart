@@ -28,7 +28,7 @@ class GraphSelector extends StatelessWidget {
                 child: InkWell(
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => GraphPage(graph: graph)),
+                    MaterialPageRoute(builder: (_) => GraphPage(graph: graph, preview: graph.preview)),
                   ),
                   borderRadius: BorderRadius.circular(10),
                   child: ClipRRect(

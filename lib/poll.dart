@@ -24,6 +24,15 @@ class GraphService extends ChangeNotifier {
     notifyListeners();
   }
 
+  void changeParameter(String graph_id, String node_id,  String param_name, String value) async {
+    for (var graph in graphs.values) {
+      graph.is_active = false;
+    }
+    notifyListeners();
+    Uri uri = Uri.parse("http://$urlString:4242/change_parameter?graph=$graph_id&node_id=$node_id&param_name=$param_name&value=$value");
+    await http.post(uri);
+  }
+
   void changeActiveShader(String id) async {
     for (var graph in graphs.values) {
       graph.is_active = false;
@@ -82,15 +91,15 @@ class GraphService extends ChangeNotifier {
         var newGrapsAsMap = {
           for (var graph in newGraphs) graph.uniqueId: graph,
         };
-        var to_remove = [];
+        var toRemove = [];
         for (var graph_id in graphs.keys) {
           if (!newGrapsAsMap.containsKey(graph_id)) {
-            to_remove.add(graph_id);
+            toRemove.add(graph_id);
             something_changed = true;
           }
         }
-        for (var i = 0; i < to_remove.length; ++i) {
-          graphs.remove(to_remove[i]);
+        for (var i = 0; i < toRemove.length; ++i) {
+          graphs.remove(toRemove[i]);
         }
       } else {
         graphs = {};

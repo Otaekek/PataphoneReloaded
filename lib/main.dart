@@ -43,7 +43,12 @@ Future<void> main() async {
       outlineVariant: const Color.fromARGB(255, 139, 40, 155),
       brightness: Brightness.dark,
     ),
-
+    sliderTheme: SliderThemeData(
+      activeTrackColor: Colors.purple.shade100,
+      inactiveTrackColor: Colors.purple.shade100,
+      thumbColor: Colors.purple,
+      overlayColor: Colors.purple.withOpacity(0.2),
+    ),
     textTheme: TextTheme(
       displayLarge: const TextStyle(fontSize: 72, fontWeight: FontWeight.bold),
       // ···
