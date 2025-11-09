@@ -7,7 +7,7 @@ import 'mapping.dart' show PolygonEditorScreen;
 class HomePage extends StatelessWidget {
   List<CameraDescription> cameras;
 
-  HomePage({required this.cameras});
+  HomePage({super.key, required this.cameras});
 
   @override
   Widget build(BuildContext context) {

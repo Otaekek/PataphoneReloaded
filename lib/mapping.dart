@@ -1,10 +1,8 @@
-import 'dart:ffi' hide Size;
 
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 class PolygonEditorScreen extends StatefulWidget {
-  const PolygonEditorScreen({Key? key}) : super(key: key);
+  const PolygonEditorScreen({super.key});
 
   @override
   State<PolygonEditorScreen> createState() => _PolygonEditorScreenState();
@@ -40,10 +38,10 @@ class _PolygonEditorScreenState extends State<PolygonEditorScreen> {
   void _add_polygon() {
     setState(() {
       for (var i = 0; i < 3; ++i) {
-        var new_index = vertices[i].length;
+        var newIndex = vertices[i].length;
         vertices[i].add([]);
-        vertices[i][new_index] = make_default_polygon();
-        selectedPolygonIndex = new_index;
+        vertices[i][newIndex] = make_default_polygon();
+        selectedPolygonIndex = newIndex;
       }
       selectedVertexIndex = null;
     });
@@ -89,7 +87,7 @@ class _PolygonEditorScreenState extends State<PolygonEditorScreen> {
   }
 
   Offset toFractionnal(Offset offset, Size? size) {
-    return Offset(offset.dx / size!.width, offset.dy / size!.height);
+    return Offset(offset.dx / size!.width, offset.dy / size.height);
   }
 
   @override
@@ -427,16 +425,16 @@ class PolygonPainter extends CustomPainter {
       ..color = Colors.grey[300]!
       ..strokeWidth = 0.5;
 
-    final gridSpacing_x = 0.2 * size.width / 3.2; // / 15/168888888888;
-    final gridSpacing_y = 0.2 * size.height / 3.2; // / 15/168888888888;
+    final gridspacingX = 0.2 * size.width / 3.2; // / 15/168888888888;
+    final gridspacingY = 0.2 * size.height / 3.2; // / 15/168888888888;
 
     // Vertical lines
-    for (double x = 0; x < size.width; x += gridSpacing_x) {
+    for (double x = 0; x < size.width; x += gridspacingX) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
     }
 
     // Horizontal lines
-    for (double y = 0; y < size.height; y += gridSpacing_y) {
+    for (double y = 0; y < size.height; y += gridspacingY) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
   }

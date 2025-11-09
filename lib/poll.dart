@@ -24,12 +24,12 @@ class GraphService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeParameter(String graph_id, String node_id,  String param_name, String value) async {
+  void changeParameter(String graphId, String nodeId,  String paramName, String value) async {
     for (var graph in graphs.values) {
       graph.is_active = false;
     }
     notifyListeners();
-    Uri uri = Uri.parse("http://$urlString:4242/change_parameter?graph=$graph_id&node_id=$node_id&param_name=$param_name&value=$value");
+    Uri uri = Uri.parse("http://$urlString:4242/change_parameter?graph=$graphId&node_id=$nodeId&param_name=$paramName&value=$value");
     await http.post(uri);
   }
 
@@ -48,7 +48,7 @@ class GraphService extends ChangeNotifier {
   Future<void> fetchGraphs() async {
     Uri uri = Uri.parse("http://$urlString:4242/get_graphs");
 
-    bool something_changed = false;
+    bool somethingChanged = false;
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
@@ -67,9 +67,9 @@ class GraphService extends ChangeNotifier {
             Image? image;
             if (graphData["has_preview"]) {
               var id = graphData["id"];
-              Uri uri_images = Uri.parse("http://$urlString:4242/get_image/$id");
-              var image_data = await http.get(uri_images);
-              var bmp = img.decodeBmp(image_data.bodyBytes)!;
+              Uri uriImages = Uri.parse("http://$urlString:4242/get_image/$id");
+              var imageData = await http.get(uriImages);
+              var bmp = img.decodeBmp(imageData.bodyBytes)!;
               image = Image.memory(Uint8List.fromList(img.encodeBmp(bmp)));
             }
             Graph graph = Graph.fromJson(graphName, graphData, nodesData, image);
@@ -81,11 +81,11 @@ class GraphService extends ChangeNotifier {
             // graph itself is modified
             if (!graphs[graph.uniqueId]!.compare(graph)) {
               graphs[graph.uniqueId] = graph;
-              something_changed = true;
+              somethingChanged = true;
             }
           } else {
             graphs[graph.uniqueId] = graph;
-            something_changed = true;
+            somethingChanged = true;
           }
         }
         var newGrapsAsMap = {
@@ -95,7 +95,7 @@ class GraphService extends ChangeNotifier {
         for (var graph_id in graphs.keys) {
           if (!newGrapsAsMap.containsKey(graph_id)) {
             toRemove.add(graph_id);
-            something_changed = true;
+            somethingChanged = true;
           }
         }
         for (var i = 0; i < toRemove.length; ++i) {
@@ -112,7 +112,7 @@ class GraphService extends ChangeNotifier {
       graphs = {};
       connected = false;
     }
-    if (something_changed) {
+    if (somethingChanged) {
       notifyListeners();
     }
   }

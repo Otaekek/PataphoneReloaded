@@ -1,9 +1,5 @@
-import 'dart:io';
-import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:convert';
 import 'dart:async';
 import 'package:image/image.dart' as img;
 import 'dart:typed_data';
@@ -22,9 +18,9 @@ class Graph {
   bool is_active = false;
 
   bool compare(Graph other) {
-    final same_id = other.uniqueId == uniqueId;
-    final same_name = other.name == name;
-    bool same_node = true;
+    final sameId = other.uniqueId == uniqueId;
+    final sameName = other.name == name;
+    bool sameNode = true;
     if (nodes.length != other.nodes.length) {
       return false;
     }
@@ -33,12 +29,12 @@ class Graph {
         return false;
       }
     }
-    return same_id &&
-        same_name &&
-        same_node &&
+    return sameId &&
+        sameName &&
+        sameNode &&
         version == other.version &&
         //is_active == other.is_active &&
-        same_node;
+        sameNode;
   }
 
   Graph(
@@ -97,7 +93,7 @@ class Graph {
     Image? image,
   ) {
     List<Node> nodes = [];
-    final unique_id = graphJson["id"];
+    final uniqueId = graphJson["id"];
     final nodeNames = graphJson['nodes_name'];
     for (var nodeName in nodeNames) {
       if (nodesJson.containsKey(nodeName)) {
@@ -111,7 +107,7 @@ class Graph {
       name: graphJson["name"],
       version: graphJson["version"],
       nodes: nodes,
-      uniqueId: unique_id,
+      uniqueId: uniqueId,
       is_active: graphJson["is_active"],
     );
   }

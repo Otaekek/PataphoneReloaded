@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import 'connection.dart' show NoConnection;
 import 'graph.dart' show GraphPage;
 import 'poll.dart';
-import 'dart:math';
-import 'package:image/image.dart' as img;
 
 class GraphSelector extends StatelessWidget {
   const GraphSelector({super.key});

@@ -11,7 +11,7 @@ Future<void> main() async {
   final graphService = GraphService();
   graphService.startPolling();
   // Set window size for desktop platforms
-  List<CameraDescription> _cameras = [];
+  List<CameraDescription> cameras = [];
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -35,7 +35,7 @@ Future<void> main() async {
       await windowManager.focus();
     });
   } else {
-    _cameras = await availableCameras();
+    cameras = await availableCameras();
   }
   ThemeData theme = ThemeData(
     colorScheme: ColorScheme.fromSeed(
@@ -63,7 +63,7 @@ Future<void> main() async {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: theme,
-        home: HomePage(cameras: _cameras),
+        home: HomePage(cameras: cameras),
       ),
     ),
   );

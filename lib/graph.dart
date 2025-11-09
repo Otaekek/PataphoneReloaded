@@ -1,4 +1,3 @@
-import 'package:pataphone/utils.dart';
 
 import 'data.dart' show Graph, NodeAttribute;
 import 'package:flutter/material.dart';
@@ -6,7 +5,7 @@ import 'package:flutter/material.dart';
 class GraphPage extends StatelessWidget {
   final Graph graph;
   final Image? preview;
-  GraphPage({required this.graph, required this.preview});
+  const GraphPage({super.key, required this.graph, required this.preview});
 
 
   Widget makePreview() {

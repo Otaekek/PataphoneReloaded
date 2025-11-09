@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:pataphone/utils.dart';
 import 'package:provider/provider.dart';
-import 'data.dart';
 import 'poll.dart' show GraphService;
 
 class NodeAttribute extends StatefulWidget {
@@ -16,7 +15,7 @@ class NodeAttribute extends StatefulWidget {
   final String node_name;
 
   const NodeAttribute({
-    Key? key,
+    super.key,
     required this.type,
     required this.attribute_name,
     required this.graphs_name,
@@ -25,7 +24,7 @@ class NodeAttribute extends StatefulWidget {
     this.isDefaultValue = true,
     this.min = -10,
     this.max = 10,
-  }) : super(key: key);
+  });
 
   bool compare(NodeAttribute other) {
     return value == other.value && attribute_name == other.attribute_name;
@@ -89,11 +88,11 @@ class _NodeAttributeState extends State<NodeAttribute> {
                   ).copyWith(activeTrackColor: color, thumbColor: color),
                   child: Slider(
                     value: value,
-                    onChanged: (in_value) {
-                      graphService.changeParameter(widget.graphs_name, widget.node_name, widget.attribute_name, in_value.toString());
+                    onChanged: (inValue) {
+                      graphService.changeParameter(widget.graphs_name, widget.node_name, widget.attribute_name, inValue.toString());
                       setState(() {
                         isDefaultValue = false;
-                        value = in_value;
+                        value = inValue;
                       });
                     },
                     min: min,
@@ -110,7 +109,7 @@ class _NodeAttributeState extends State<NodeAttribute> {
     return Text("Unavailable");
   }
 
-  static NodeAttribute fromJson(String graph_name, String node_name, String name, Map<String, dynamic> json) {
+  static NodeAttribute fromJson(String graphName, String nodeName, String name, Map<String, dynamic> json) {
     dynamic value;
     dynamic min = -10;
     dynamic max = 10;
@@ -130,8 +129,8 @@ class _NodeAttributeState extends State<NodeAttribute> {
 
     return NodeAttribute(
       attribute_name: name,
-      graphs_name: graph_name,
-      node_name: node_name,
+      graphs_name: graphName,
+      node_name: nodeName,
       type: type,
       value: value,
       min: min,
@@ -166,7 +165,7 @@ class Node extends StatelessWidget {
     return ret;
   }
 
-  const Node({required this.name, required this.attributes});
+  const Node({super.key, required this.name, required this.attributes});
 
   @override
   Widget build(BuildContext context) {
