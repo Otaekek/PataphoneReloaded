@@ -4,16 +4,33 @@ import 'package:camera/camera.dart';
 import 'graphselector.dart';
 import 'mapping.dart' show PolygonEditorScreen;
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   List<CameraDescription> cameras;
 
   HomePage({super.key, required this.cameras});
 
   @override
+  State<StatefulWidget> createState() {
+    return _HomePageState();
+  }
+}
+
+class _HomePageState extends State<HomePage> {
+  late List<CameraDescription> cameras;
+  late Widget mapWidget;
+
+  @override
+  void initState() {
+    super.initState();
+    cameras = widget.cameras;
+    mapWidget = PolygonEditorScreen();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       initialIndex: 0,
-      length: 4,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           actions: <Widget>[
@@ -44,7 +61,7 @@ class HomePage extends StatelessWidget {
                 text: "Shaders",
               ), // Should be named graphs, but this is more intuitive
               Tab(icon: const Icon(Icons.camera_alt), text: "Record"),
-              Tab(icon: const Icon(Icons.lightbulb), text: "Light"),
+              // Tab(icon: const Icon(Icons.lightbulb), text: "Light"),
               Tab(icon: const Icon(Icons.settings_overscan), text: "Mapping"),
             ],
           ),
@@ -53,8 +70,8 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             GraphSelector(),
             CameraWidget(cameras: cameras),
-            GraphSelector(),
-            PolygonEditorScreen(),
+            //   GraphSelector(),
+            mapWidget,
           ],
         ),
       ),
