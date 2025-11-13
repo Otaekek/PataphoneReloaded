@@ -3,6 +3,9 @@ import 'dart:ffi' hide Size;
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:pataphone/poll.dart';
+import 'package:provider/provider.dart' show Provider;
+
 class PolygonEditorScreen extends StatefulWidget {
   const PolygonEditorScreen({Key? key}) : super(key: key);
 
@@ -11,8 +14,7 @@ class PolygonEditorScreen extends StatefulWidget {
 }
 
 class _PolygonEditorScreenState extends State<PolygonEditorScreen>
-
-    with AutomaticKeepAliveClientMixin<PolygonEditorScreen>  {
+    with AutomaticKeepAliveClientMixin<PolygonEditorScreen> {
   late List<List<List<Offset>>> vertices;
   int? selectedVertexIndex;
   int selectedPolygonIndex = 0;
@@ -39,6 +41,7 @@ class _PolygonEditorScreenState extends State<PolygonEditorScreen>
       [make_default_polygon()],
     ];
   }
+  void updateRequest() {}
   void _add_polygon() {
     setState(() {
       for (var i = 0; i < 3; ++i) {
@@ -94,9 +97,34 @@ class _PolygonEditorScreenState extends State<PolygonEditorScreen>
     return Offset(offset.dx / size!.width, offset.dy / size!.height);
   }
 
+  void sendRequest(GraphService graphService) {
+    List<List<Offset>> data = List.generate(
+      vertices[0].length * 2,
+      (index) => List.filled(4, Offset(0, 0)),
+    );
+
+    Offset delta = Offset(14.0 / 16.0, 10.0 / 16.0);
+    Offset offset = Offset(1.0 / 16.0, 1.0 / 16.0);
+    for (var type = 0; type < 2; type++) {
+    var polyIdx = 0;
+      for (var poly in vertices[type]) {
+        var pointIdx = 0;
+        for (var point in poly) {
+          var t = (point - offset);
+          var newPoint = Offset(t.dx / delta.dx, t.dy / delta.dy);
+          data[polyIdx + type * vertices[0].length][pointIdx] = newPoint;
+          pointIdx++;
+        }
+        polyIdx++;
+      }
+    }
+    graphService.updateMapping(data, wireFrame);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final graphService = Provider.of<GraphService>(context);
+    var ret = Scaffold(
       appBar: AppBar(
         title: const Text('Global'),
         actions: [
@@ -115,7 +143,7 @@ class _PolygonEditorScreenState extends State<PolygonEditorScreen>
                 selectedType = selectedType == 1 ? 0 : 1;
               });
             },
-            tooltip: 'New Polygon',
+            tooltip: 'Change type',
           ),
 
           IconButton(
@@ -232,6 +260,8 @@ class _PolygonEditorScreenState extends State<PolygonEditorScreen>
       //         )
       //       : null,
     );
+    sendRequest(graphService);
+    return ret;
   }
 
   int? _findNearbyVertex(Offset position) {
@@ -259,56 +289,9 @@ class _PolygonEditorScreenState extends State<PolygonEditorScreen>
       selectedVertexIndex = null;
     });
   }
-  
+
   @override
   bool get wantKeepAlive => true;
-
-  //  void _showColorPicker() {
-  //    showDialog(
-  //      context: context,
-  //      builder: (context) => AlertDialog(
-  //        title: const Text('Choose Polygon Color'),
-  //        content: Wrap(
-  //          spacing: 10,
-  //          runSpacing: 10,
-  //          children:
-  //              [
-  //                Colors.blue,
-  //                Colors.red,
-  //                Colors.green,
-  //                Colors.orange,
-  //                Colors.purple,
-  //                Colors.teal,
-  //                Colors.pink,
-  //                Colors.amber,
-  //              ].map((color) {
-  //                return GestureDetector(
-  //                  onTap: () {
-  //                    setState(() {
-  //                      polygonColor = color;
-  //                    });
-  //                    Navigator.pop(context);
-  //                  },
-  //                  child: Container(
-  //                    width: 50,
-  //                    height: 50,
-  //                    decoration: BoxDecoration(
-  //                      color: color,
-  //                      shape: BoxShape.circle,
-  //                      border: Border.all(
-  //                        color: polygonColor == color
-  //                            ? Colors.black
-  //                            : Colors.transparent,
-  //                        width: 3,
-  //                      ),
-  //                    ),
-  //                  ),
-  //                );
-  //              }).toList(),
-  //        ),
-  //      ),
-  //    );
-  //  }
 }
 
 class PolygonPainter extends CustomPainter {
@@ -414,11 +397,11 @@ class PolygonPainter extends CustomPainter {
     if (showGrid) {
       _drawGrid(canvas, size);
     }
-
+    paint_polygon(canvas, size, 2, 0, false);
     for (var index = 0; index < vertices[selectedType].length; index++) {
       bool isSelectedPolygon =
           selectedPolygonIndex == index && selectedType == selectedType;
-      paint_polygon(canvas, size, 2, 0, false);
+
       if (isSelectedPolygon) {
         continue;
       }

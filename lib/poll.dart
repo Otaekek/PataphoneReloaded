@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'data.dart';
 import 'dart:async';
 import 'package:image/image.dart' as img;
+
 class GraphService extends ChangeNotifier {
   Map<String, Graph> graphs = {};
   late String urlString;
@@ -24,19 +25,38 @@ class GraphService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeParameter(String graphId, String nodeId,  String paramName, String value) async {
+  void updateMapping(List<List<Offset>> polys, bool wireFrame) async {
+    String pointRequest = "wireframe=$wireFrame&";
+    for (var poly in polys) {
+      for (var point in poly) {
+        pointRequest = "$pointRequest${point.dx},${point.dy};";
+      }
+      pointRequest = "${pointRequest}&";
+    }
+    Uri uri = Uri.parse("http://$urlString:4242/update_mapping?$pointRequest");
+    await http.post(uri);
+  }
+
+  void changeParameter(
+    String graphId,
+    String nodeId,
+    String paramName,
+    String value,
+  ) async {
     for (var graph in graphs.values) {
       graph.is_active = false;
     }
     notifyListeners();
-    Uri uri = Uri.parse("http://$urlString:4242/change_parameter?graph=$graphId&node_id=$nodeId&param_name=$paramName&value=$value");
+    Uri uri = Uri.parse(
+      "http://$urlString:4242/change_parameter?graph=$graphId&node_id=$nodeId&param_name=$paramName&value=$value",
+    );
     await http.post(uri);
   }
 
   void changeActiveShader(String id) async {
     for (var graph in graphs.values) {
       graph.is_active = false;
-    } 
+    }
     if (graphs.containsKey(id)) {
       graphs[id]!.is_active = true;
     }
@@ -44,6 +64,7 @@ class GraphService extends ChangeNotifier {
     Uri uri = Uri.parse("http://$urlString:4242/set_active_graph?graph=$id");
     await http.post(uri);
   }
+
   // Custom constructor
   Future<void> fetchGraphs() async {
     Uri uri = Uri.parse("http://$urlString:4242/get_graphs");
@@ -61,7 +82,7 @@ class GraphService extends ChangeNotifier {
         final graphsData = jsonData['graphs'];
         List<Graph> newGraphs = [];
         for (var graphName in graphNames) {
-          if (graphsData.containsKey( graphName)) {
+          if (graphsData.containsKey(graphName)) {
             dynamic graphData = graphsData[graphName];
             final nodesData = graphData['nodes'];
             Image? image;
@@ -72,7 +93,12 @@ class GraphService extends ChangeNotifier {
               var bmp = img.decodeBmp(imageData.bodyBytes)!;
               image = Image.memory(Uint8List.fromList(img.encodeBmp(bmp)));
             }
-            Graph graph = Graph.fromJson(graphName, graphData, nodesData, image);
+            Graph graph = Graph.fromJson(
+              graphName,
+              graphData,
+              nodesData,
+              image,
+            );
             newGraphs.add(graph);
           }
         }

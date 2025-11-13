@@ -13,6 +13,7 @@ class NodeAttribute extends StatefulWidget {
   final String attribute_name;
   final String graphs_name;
   final String node_name;
+  final String defaultValue;
 
   const NodeAttribute({
     super.key,
@@ -20,6 +21,7 @@ class NodeAttribute extends StatefulWidget {
     required this.attribute_name,
     required this.graphs_name,
     required this.node_name,
+    required this.defaultValue,
     this.value,
     this.isDefaultValue = true,
     this.min = -10,
@@ -48,6 +50,18 @@ class _NodeAttributeState extends State<NodeAttribute> {
     isDefaultValue = widget.isDefaultValue;
   }
 
+  dynamic parse_value(String value) {
+    if (value.contains("x")) {
+      return value;
+    } else if (value.contains("alse")) {
+      return 0.0;
+    } else if (value.contains("rue")) {
+      return 1.0;
+    } else {
+      return double.parse(value);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var color = isDefaultValue == true ? Colors.purple : Colors.blue;
@@ -55,67 +69,105 @@ class _NodeAttributeState extends State<NodeAttribute> {
 
     // Add your widget UI here
     if (widget.type == "float") {
-      return Card( child: Column(
-        children: [
-          Stack(
-            children: [
-              Align(alignment: Alignment.bottomCenter, child: Text("${widget.attribute_name}: ${value.toStringAsFixed(2)}" )),
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  icon: Icon(Icons.restore),
-                  onPressed: () {
-                    setState(() {
-                      value = widget.value;
-                      min = widget.min;
-                      max = widget.max;
-                      isDefaultValue = widget.isDefaultValue;
-                    });
-                    graphService.changeParameter(widget.graphs_name, widget.node_name, widget.attribute_name, widget.isDefaultValue? "x" : value.toString());
-                  },
-                  tooltip: 'reset',
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Text(min.toStringAsFixed(2)),
-              Expanded(
-                child: SliderTheme(
-                  data: SliderTheme.of(
-                    context,
-                  ).copyWith(activeTrackColor: color, thumbColor: color),
-                  child: Slider(
-                    value: value,
-                    onChanged: (inValue) {
-                      graphService.changeParameter(widget.graphs_name, widget.node_name, widget.attribute_name, inValue.toString());
+      return Card(
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_circle_up),
+                    onPressed: () {
                       setState(() {
-                        isDefaultValue = false;
-                        value = inValue;
+                        max *= 2;
+                        min *= 2;
                       });
                     },
-                    min: min,
-                    max: max,
+                    tooltip: 'multiply bounds',
                   ),
                 ),
-              ),
-              Align(child: Text(max.toStringAsFixed(2))),
-            ],
-          ),
-        ],
-      ));
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Text(
+                    "${widget.attribute_name}: ${value.toStringAsFixed(2)}",
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: Icon(Icons.restore),
+                    onPressed: () {
+                      setState(() {
+                        print(widget.defaultValue);
+                        value = parse_value(widget.defaultValue);
+                        min = widget.min;
+                        max = widget.max;
+                        //                        isDefaultValue = true;
+                      });
+                      graphService.changeParameter(
+                        widget.graphs_name,
+                        widget.node_name,
+                        widget.attribute_name,
+                        widget.defaultValue,
+                      );
+                    },
+                    tooltip: 'reset',
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(min.toStringAsFixed(2)),
+                Expanded(
+                  child: SliderTheme(
+                    data: SliderTheme.of(
+                      context,
+                    ).copyWith(activeTrackColor: color, thumbColor: color),
+                    child: Slider(
+                      divisions: 20,
+                      value: value,
+                      onChanged: (inValue) {
+                        graphService.changeParameter(
+                          widget.graphs_name,
+                          widget.node_name,
+                          widget.attribute_name,
+                          inValue.toString(),
+                        );
+                        setState(() {
+                          isDefaultValue = false;
+                          value = inValue;
+                        });
+                      },
+                      min: min,
+                      max: max,
+                    ),
+                  ),
+                ),
+                Align(child: Text(max.toStringAsFixed(2))),
+              ],
+            ),
+          ],
+        ),
+      );
     }
     return Text("Unavailable");
   }
 
-  static NodeAttribute fromJson(String graphName, String nodeName, String name, Map<String, dynamic> json) {
+  static NodeAttribute fromJson(
+    String graphName,
+    String nodeName,
+    String name,
+    Map<String, dynamic> json,
+  ) {
     dynamic value;
     dynamic min = -10;
     dynamic max = 10;
     String type = map_type(json["type"]);
 
     if (type == "float") {
+
       value = double.parse(json["values"].toString());
       min = -1.0;
       max = 1.0;
@@ -128,6 +180,7 @@ class _NodeAttributeState extends State<NodeAttribute> {
     }
 
     return NodeAttribute(
+      defaultValue: json["default_value"],
       attribute_name: name,
       graphs_name: graphName,
       node_name: nodeName,
@@ -135,7 +188,7 @@ class _NodeAttributeState extends State<NodeAttribute> {
       value: value,
       min: min,
       max: max,
-      isDefaultValue: json["is_default_value"] ?? true,
+      isDefaultValue: json["is_default_value"],
     );
   }
 }
@@ -182,11 +235,20 @@ class Node extends StatelessWidget {
     );
   }
 
-  factory Node.fromJson(String graph_name, String name, Map<String, dynamic> json) {
+  factory Node.fromJson(
+    String graph_name,
+    String name,
+    Map<String, dynamic> json,
+  ) {
     Map<String, NodeAttribute> attributes = {};
     json.forEach((key, value) {
       if (map_type(value["type"]) != "undefined") {
-        attributes[key] = _NodeAttributeState.fromJson(graph_name, name, key, value);
+        attributes[key] = _NodeAttributeState.fromJson(
+          graph_name,
+          name,
+          key,
+          value,
+        );
       }
     });
     return Node(name: name, attributes: attributes);
