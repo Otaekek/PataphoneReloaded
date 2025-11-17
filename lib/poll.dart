@@ -42,13 +42,14 @@ class GraphService extends ChangeNotifier {
     String nodeId,
     String paramName,
     String value,
+    bool isCpuParam,
   ) async {
     for (var graph in graphs.values) {
       graph.is_active = false;
     }
     notifyListeners();
     Uri uri = Uri.parse(
-      "http://$urlString:4242/change_parameter?graph=$graphId&node_id=$nodeId&param_name=$paramName&value=$value",
+      "http://$urlString:4242/change_parameter?graph=$graphId&node_id=$nodeId&param_name=$paramName&value=$value&is_cpu_param=$isCpuParam",
     );
     await http.post(uri);
   }

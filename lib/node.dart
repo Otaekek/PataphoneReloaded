@@ -14,6 +14,7 @@ class NodeAttribute extends StatefulWidget {
   final String graphs_name;
   final String node_name;
   final String defaultValue;
+  final bool isCpuParam;
 
   const NodeAttribute({
     super.key,
@@ -22,6 +23,7 @@ class NodeAttribute extends StatefulWidget {
     required this.graphs_name,
     required this.node_name,
     required this.defaultValue,
+    required this.isCpuParam,
     this.value,
     this.isDefaultValue = true,
     this.min = -10,
@@ -40,6 +42,7 @@ class _NodeAttributeState extends State<NodeAttribute> {
   late dynamic value;
   late dynamic min;
   late dynamic max;
+  late bool type = true;
   late bool isDefaultValue;
   @override
   void initState() {
@@ -75,6 +78,18 @@ class _NodeAttributeState extends State<NodeAttribute> {
             Stack(
               children: [
                 Align(
+                  alignment: Alignment(-0.8, 0.0),
+                  child: IconButton(
+                    icon: Icon(Icons.pin),
+                    onPressed: () {
+                      setState(() {
+                        type = !type;
+                      });
+                    },
+                    tooltip: 'change type',
+                  ),
+                ),
+                Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     icon: Icon(Icons.arrow_circle_up),
@@ -99,17 +114,18 @@ class _NodeAttributeState extends State<NodeAttribute> {
                     icon: Icon(Icons.restore),
                     onPressed: () {
                       setState(() {
-                        print(widget.defaultValue);
                         value = parse_value(widget.defaultValue);
                         min = widget.min;
                         max = widget.max;
-                        //                        isDefaultValue = true;
+                        type = true;
+                        isDefaultValue = true;
                       });
                       graphService.changeParameter(
                         widget.graphs_name,
                         widget.node_name,
                         widget.attribute_name,
-                        widget.defaultValue,
+                        "x",
+                        widget.isCpuParam,
                       );
                     },
                     tooltip: 'reset',
@@ -126,7 +142,7 @@ class _NodeAttributeState extends State<NodeAttribute> {
                       context,
                     ).copyWith(activeTrackColor: color, thumbColor: color),
                     child: Slider(
-                      divisions: 20,
+                      divisions: type == true ? 20 :(max - min).floor(),
                       value: value,
                       onChanged: (inValue) {
                         graphService.changeParameter(
@@ -134,6 +150,7 @@ class _NodeAttributeState extends State<NodeAttribute> {
                           widget.node_name,
                           widget.attribute_name,
                           inValue.toString(),
+                          widget.isCpuParam,
                         );
                         setState(() {
                           isDefaultValue = false;
@@ -167,7 +184,6 @@ class _NodeAttributeState extends State<NodeAttribute> {
     String type = map_type(json["type"]);
 
     if (type == "float") {
-
       value = double.parse(json["values"].toString());
       min = -1.0;
       max = 1.0;
@@ -178,9 +194,9 @@ class _NodeAttributeState extends State<NodeAttribute> {
       min *= 2.0;
       max *= 2.0;
     }
-
     return NodeAttribute(
       defaultValue: json["default_value"],
+      isCpuParam: json["is_cpu_param"] == true,
       attribute_name: name,
       graphs_name: graphName,
       node_name: nodeName,
