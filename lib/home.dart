@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
           ],
           flexibleSpace: Align(
             child: Image.asset(
-              alignment: Alignment.center,
+              alignment: Alignment(0.0, -0.3),
               'assets/images/eye1.png',
               height: 220,
               width: 120,

@@ -10,6 +10,7 @@ import 'package:camera/camera.dart';
 Future<void> main() async {
   final graphService = GraphService();
   graphService.startPolling();
+  WidgetsFlutterBinding.ensureInitialized();
   // Set window size for desktop platforms
   List<CameraDescription> cameras = [];
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
